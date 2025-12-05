@@ -20,6 +20,8 @@ pnpm-debug.log*
 # Env
 .env
 .env.*
+!.env.example
+!apps/*/.env.example
 apps/web/.env.local
 
 # Editor/OS

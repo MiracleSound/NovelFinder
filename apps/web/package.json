@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "echo \"lint to be configured\"",
+    "lint": "eslint --max-warnings 0 --config ../../.eslintrc.cjs --ext .ts,.tsx src",
     "test": "echo \"test to be configured\""
   },
   "dependencies": {

@@ -12,3 +12,9 @@
 ## MVP 摘要
 - 目标：根据自然语言描述推荐高匹配度、高热度的小说，并生成“博主风推文”卡片。
 - 关键能力：自然语言搜索/召回（先用 mock）、匹配度与热度评分、推文卡片生成、推荐理由、喜欢/不感兴趣反馈、热门话题与流量洞察。
+
+## 快速开始
+1) 安装依赖：`pnpm install`（需要 Node 18+）
+2) 后端：`cp apps/api/.env.example apps/api/.env`，`pnpm dev:api`（默认 3001）
+3) 前端：`cp apps/web/.env.example apps/web/.env.local`，`pnpm dev:web`（默认 5173）
+4) 访问 http://localhost:5173 查看 mock 版 UI；当前推荐/热门接口均为占位数据。 

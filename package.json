@@ -1,0 +1,21 @@
+{
+  "name": "novelfinder",
+  "private": true,
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "pnpm --filter api dev",
+    "build:web": "pnpm --filter web build",
+    "build:api": "pnpm --filter api build",
+    "lint": "pnpm lint:web && pnpm lint:api",
+    "lint:web": "pnpm --filter web lint",
+    "lint:api": "pnpm --filter api lint",
+    "test": "pnpm test:web && pnpm test:api",
+    "test:web": "pnpm --filter web test",
+    "test:api": "pnpm --filter api test"
+  },
+  "packageManager": "pnpm@8.15.8"
+}

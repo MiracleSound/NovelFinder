@@ -1,11 +1,13 @@
 # Node/PNPM
 node_modules/
+apps/*/node_modules/
 pnpm-lock.yaml
 .pnp.*
 
 # Build outputs
 dist/
 build/
+apps/*/dist/
 .turbo/
 
 # Logs

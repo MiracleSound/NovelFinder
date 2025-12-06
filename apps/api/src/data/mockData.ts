@@ -45,6 +45,30 @@ const mockNovels: Novel[] = [
     heatScore: 8.9,
     synopsis: '无限流高智商博弈，兼顾团队成长与情绪反差，情节紧凑，风格偏克制。 ',
   },
+  {
+    id: 'novel_4',
+    title: '月落蒹葭',
+    author: '临江夜',
+    tags: ['古言', '权谋', '女主成长', '朝堂博弈', '慢热'],
+    platform: 'jjwxc',
+    status: 'completed',
+    wordCount: 980000,
+    coverUrl: 'https://placehold.co/320x430?text=Novel+4',
+    heatScore: 8.2,
+    synopsis: '古言权谋+慢热情感线，女主自救成长，朝堂暗线和情感线交织。',
+  },
+  {
+    id: 'novel_5',
+    title: '全息荒野直播',
+    author: '江舟',
+    tags: ['全息', '生存', '爽感', '双强', '轻松'],
+    platform: 'qidian',
+    status: 'ongoing',
+    wordCount: 450000,
+    coverUrl: 'https://placehold.co/320x430?text=Novel+5',
+    heatScore: 8.5,
+    synopsis: '全息荒野求生直播，双强组合爽点密集，节奏轻快兼具策略感。',
+  },
 ];
 
 const trendingTopics: TrendingTopic[] = [
@@ -60,7 +84,7 @@ const insights: Insight[] = [
 ];
 
 function matchScoreFromTags(query: UserQuery, novel: Novel): number {
-  let score = 0.68;
+  let score = 0.65;
   const desc = query.description.toLowerCase();
   novel.tags.forEach((tag) => {
     if (desc.includes(tag.toLowerCase())) {
@@ -74,7 +98,18 @@ function matchScoreFromTags(query: UserQuery, novel: Novel): number {
     const hit = query.moodTags.filter((tag) => novel.tags.includes(tag)).length;
     score += Math.min(hit * 0.03, 0.06);
   }
-  return Number(Math.min(score, 0.96).toFixed(2));
+  if (query.completion && query.completion !== 'any' && query.completion === novel.status) {
+    score += 0.04;
+  }
+  if (query.lengthPref === 'short' && novel.wordCount < 600000) {
+    score += 0.02;
+  }
+  if (query.lengthPref === 'long' && novel.wordCount >= 800000) {
+    score += 0.02;
+  }
+  const descBonus = Math.min(Math.max(desc.length / 400, 0), 0.04); // 描述越长，给微弱奖励
+  score += descBonus;
+  return Number(Math.min(score, 0.97).toFixed(2));
 }
 
 function buildRecommendation(novel: Novel, query: UserQuery, idx: number): RecommendationItem {

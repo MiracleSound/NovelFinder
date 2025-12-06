@@ -5,6 +5,7 @@ import formBody from '@fastify/formbody';
 import { recommendationRoutes } from './routes/recommendations.js';
 import { trendingRoutes } from './routes/trending.js';
 import { healthRoutes } from './routes/health.js';
+import { registerErrorHandler } from './plugins/errorHandler.js';
 
 const server = Fastify({
   logger: true,
@@ -16,6 +17,7 @@ async function buildServer() {
   await server.register(healthRoutes);
   await server.register(recommendationRoutes, { prefix: '/api/v1' });
   await server.register(trendingRoutes, { prefix: '/api/v1' });
+  registerErrorHandler(server);
   return server;
 }
 

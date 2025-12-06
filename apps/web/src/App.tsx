@@ -23,6 +23,14 @@ function TagPill({ label, active, onClick }: { label: string; active: boolean; o
   );
 }
 
+const platformLabel = (platform: RecommendationItem['platform']) => {
+  if (platform === 'jjwxc') return '晋江';
+  if (platform === 'qidian') return '起点';
+  if (platform === 'changpei') return '长佩';
+  if (platform === 'other') return '其他';
+  return platform;
+};
+
 function RecommendationCard({ item }: { item: RecommendationItem }) {
   return (
     <div className="card card-hover flex gap-4 p-4">
@@ -42,7 +50,7 @@ function RecommendationCard({ item }: { item: RecommendationItem }) {
             <div className="font-semibold text-ink">匹配度 {Math.round(item.matchScore * 100)}%</div>
             <div>热度 {item.heatScore} / 10</div>
             <div>
-              {item.platform} · {item.status === 'completed' ? '完结' : '连载'}
+              {platformLabel(item.platform)} · {item.status === 'completed' ? '完结' : '连载'}
             </div>
           </div>
         </div>

@@ -1,14 +1,15 @@
 import type { FastifyInstance } from 'fastify';
 import type { FeedbackPayload, UserQuery } from '../types.js';
+import { feedbackSchema, recommendationSchema } from '../schemas.js';
 import { getRecommendations } from '../data/mockData.js';
 
 export async function recommendationRoutes(app: FastifyInstance) {
   app.post('/recommendations/search', async (request) => {
-    const body = request.body as Partial<UserQuery> & { page?: number; pageSize?: number };
-    const page = body.page && body.page > 0 ? body.page : 1;
-    const pageSize = body.pageSize && body.pageSize > 0 ? Math.min(body.pageSize, 50) : 10;
+    const body = recommendationSchema.parse(request.body ?? {});
+    const page = body.page ?? 1;
+    const pageSize = body.pageSize ?? 10;
     const query: UserQuery = {
-      description: body.description ?? '默认描述',
+      description: body.description,
       lengthPref: body.lengthPref ?? 'medium',
       platform: body.platform ?? 'any',
       moodTags: body.moodTags ?? [],
@@ -20,7 +21,7 @@ export async function recommendationRoutes(app: FastifyInstance) {
   });
 
   app.post('/recommendations/:id/feedback', async (request) => {
-    const body = request.body as FeedbackPayload;
+    const body = feedbackSchema.parse(request.body ?? {}) as FeedbackPayload;
     const { id } = request.params as { id: string };
     // TODO: Persist feedback; currently stub.
     app.log.info({ feedback: body, id }, 'feedback received');

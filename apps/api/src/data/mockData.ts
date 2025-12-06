@@ -91,12 +91,16 @@ function buildRecommendation(novel: Novel, query: UserQuery, idx: number): Recom
 
   return {
     id: `rec_${idx + 1}`,
+    title: novel.title,
+    author: novel.author,
     novelId: novel.id,
     matchScore,
     heatScore: novel.heatScore,
     platform: novel.platform,
     status: novel.status,
     estReadTime: novel.wordCount > 1000000 ? '6-8h' : '3-5h',
+    coverUrl: novel.coverUrl,
+    wordCount: novel.wordCount,
     recTitle: `${novel.title} · 推文风标题示例`,
     recHook: novel.tags.slice(0, 3).join(' · '),
     recBody:

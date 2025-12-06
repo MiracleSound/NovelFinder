@@ -2,6 +2,7 @@ export type Platform = 'jjwxc' | 'qidian' | 'changpei' | 'other';
 
 export interface RecommendationItem {
   id: string;
+  novelId?: string;
   title: string;
   author: string;
   recTitle: string;

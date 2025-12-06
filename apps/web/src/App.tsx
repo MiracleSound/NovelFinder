@@ -1,6 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import type { Insight, RecommendationItem, TrendingTopic } from './types';
 import { mockInsights, mockRecommendations, mockTrendingTopics } from './mockData';
+import { apiClient, type RecommendationPayload } from './lib/apiClient';
 
 const moodOptions = ['慢热', '治愈', '刺激', '致郁', '搞笑', '轻松', '黑深残'];
 const platformOptions: TrendingTopic['category'][] = ['不限', '晋江', '起点', '长佩', '其他'];
@@ -30,14 +32,18 @@ function RecommendationCard({ item }: { item: RecommendationItem }) {
       <div className="flex flex-col gap-3 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <p className="text-sm text-inkMuted">{item.title} · {item.author}</p>
+            <p className="text-sm text-inkMuted">
+              {item.title} · {item.author}
+            </p>
             <h3 className="text-lg font-semibold text-ink">{item.recTitle}</h3>
             <p className="text-sm text-inkMuted mt-1">{item.recHook}</p>
           </div>
           <div className="text-right text-sm text-inkMuted">
             <div className="font-semibold text-ink">匹配度 {Math.round(item.matchScore * 100)}%</div>
             <div>热度 {item.heatScore} / 10</div>
-            <div>{item.platform} · {item.status === 'completed' ? '完结' : '连载'}</div>
+            <div>
+              {item.platform} · {item.status === 'completed' ? '完结' : '连载'}
+            </div>
           </div>
         </div>
         <p className="text-sm leading-relaxed text-ink">{item.recBody}</p>
@@ -82,13 +88,7 @@ function RecommendationCard({ item }: { item: RecommendationItem }) {
   );
 }
 
-function TrendingPanel({
-  topics,
-  insights,
-}: {
-  topics: TrendingTopic[];
-  insights: Insight[];
-}) {
+function TrendingPanel({ topics, insights }: { topics: TrendingTopic[]; insights: Insight[] }) {
   return (
     <div className="card card-hover p-4 space-y-4">
       <div>
@@ -127,18 +127,75 @@ function App() {
   const [platform, setPlatform] = useState<string>('不限');
 
   const [recommendations, setRecommendations] = useState<RecommendationItem[]>(mockRecommendations);
+  const [metaInfo, setMetaInfo] = useState<{ page: number; pageSize: number; total: number } | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const toggleMood = (mood: string) => {
     setSelectedMoods((prev) => (prev.includes(mood) ? prev.filter((m) => m !== mood) : [...prev, mood]));
   };
 
+  const mapLengthToPref = (val: string): RecommendationPayload['lengthPref'] => {
+    if (val === '长篇') return 'long';
+    if (val === '中短篇') return 'medium';
+    return 'medium';
+  };
+
+  const mapPlatform = (val: string): RecommendationPayload['platform'] => {
+    if (val === '晋江') return 'jjwxc';
+    if (val === '起点') return 'qidian';
+    if (val === '长佩') return 'changpei';
+    if (val === '其他') return 'other';
+    return 'any';
+  };
+
+  const buildPayload = (): RecommendationPayload => {
+    return {
+      description,
+      moodTags: selectedMoods,
+      lengthPref: mapLengthToPref(lengthPref),
+      platform: mapPlatform(platform),
+      completion: lengthPref === '完结优先' ? 'completed' : 'any',
+      page: 1,
+      pageSize: 10,
+    };
+  };
+
+  const { data: trendingData, isLoading: trendingLoading } = useQuery<{ topics: TrendingTopic[]; insights: Insight[] }>({
+    queryKey: ['trending'],
+    queryFn: apiClient.getTrending,
+    retry: 1,
+  });
+
+  const trendingTopics = trendingData?.topics?.length ? trendingData.topics : mockTrendingTopics;
+  const insights = trendingData?.insights?.length ? trendingData.insights : mockInsights;
+
+  const recMutation = useMutation({
+    mutationFn: (payload: RecommendationPayload) => apiClient.searchRecommendations(payload),
+    onSuccess: (res) => {
+      const items = (res.data?.items as RecommendationItem[]) || [];
+      setRecommendations(items.length ? items : mockRecommendations);
+      setMetaInfo(res.data?.meta ?? null);
+      setErrorMsg(null);
+    },
+    onError: (err: Error) => {
+      console.error('recommendations error', err);
+      setRecommendations(mockRecommendations);
+      setMetaInfo(null);
+      setErrorMsg('接口暂不可用，已使用示例数据');
+    },
+  });
+
   const handleGenerate = () => {
-    // 真实场景应调用后端，这里直接返回 mock 并打印查询条件
-    console.info('Generate with query', { description, selectedMoods, lengthPref, platform });
-    setRecommendations([...mockRecommendations]);
+    const payload = buildPayload();
+    recMutation.mutate(payload);
   };
 
   const layoutClass = useMemo(() => 'grid grid-cols-1 gap-6 xl:grid-cols-[2fr_1fr]', []);
+
+  useEffect(() => {
+    recMutation.mutate(buildPayload());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="min-h-screen text-ink">
@@ -148,9 +205,7 @@ function App() {
             <p className="text-xs uppercase tracking-[0.2em] text-primary font-semibold">Auto Novel Finder</p>
             <h1 className="text-2xl font-semibold text-ink">自动小说推文机</h1>
           </div>
-          <div className="text-sm text-inkMuted">
-            浅色柔和 · Vite + React + TS + Tailwind
-          </div>
+          <div className="text-sm text-inkMuted">浅色柔和 · Vite + React + TS + Tailwind</div>
         </div>
       </header>
 
@@ -159,9 +214,7 @@ function App() {
           <div className="space-y-3">
             <p className="text-xs uppercase tracking-[0.2em] text-primary font-semibold">描述越详细，推荐越精准</p>
             <h2 className="text-3xl font-semibold text-ink">输入你的脑洞，我们帮你找到最会爆的那本小说。</h2>
-            <p className="text-inkMuted">
-              题材、时代、CP、情绪、雷点、平台……写得越具体，匹配度越高。
-            </p>
+            <p className="text-inkMuted">题材、时代、CP、情绪、雷点、平台……写得越具体，匹配度越高。</p>
           </div>
           <div className="card card-hover p-4 text-sm text-inkMuted">
             <p className="font-semibold text-ink mb-2">填写提示</p>
@@ -211,14 +264,13 @@ function App() {
             </div>
           </div>
           <div className="flex items-center justify-between gap-4">
-            <div className="text-sm text-inkMuted">
-              先用 mock 数据展示，后续接入真实搜索/召回/评分。
-            </div>
+            <div className="text-sm text-inkMuted">先用 mock 数据展示，后续接入真实搜索/召回/评分。</div>
             <button
               onClick={handleGenerate}
-              className="px-5 py-3 rounded-md bg-primary text-white font-semibold shadow-card hover:bg-primaryHover transition"
+              disabled={recMutation.isPending}
+              className="px-5 py-3 rounded-md bg-primary text-white font-semibold shadow-card hover:bg-primaryHover transition disabled:opacity-70"
             >
-              生成推文推荐
+              {recMutation.isPending ? '生成中…' : '生成推文推荐'}
             </button>
           </div>
         </section>
@@ -228,8 +280,18 @@ function App() {
             {recommendations.map((item) => (
               <RecommendationCard key={item.id} item={item} />
             ))}
+            {errorMsg ? <p className="text-sm text-danger">{errorMsg}</p> : null}
+            {metaInfo ? (
+              <p className="text-sm text-inkMuted">
+                共 {metaInfo.total} 条 · 第 {metaInfo.page}/{Math.ceil(metaInfo.total / metaInfo.pageSize)} 页
+              </p>
+            ) : null}
           </div>
-          <TrendingPanel topics={mockTrendingTopics} insights={mockInsights} />
+          {trendingLoading ? (
+            <div className="card p-4 text-sm text-inkMuted">加载热门内容...</div>
+          ) : (
+            <TrendingPanel topics={trendingTopics} insights={insights} />
+          )}
         </section>
       </main>
     </div>

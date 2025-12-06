@@ -23,12 +23,16 @@ export interface Novel {
 
 export interface RecommendationItem {
   id: string;
+  title: string;
+  author: string;
   novelId: string;
   matchScore: number;
   heatScore: number;
   platform: Novel['platform'];
   status: Novel['status'];
   estReadTime: string;
+  coverUrl?: string;
+  wordCount?: number;
   recTitle: string;
   recHook: string;
   recBody: string;

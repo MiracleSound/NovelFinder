@@ -5,8 +5,17 @@ import type { FeedbackPayload, UserQuery } from '../types.js';
 import type { FastifyInstance } from 'fastify';
 
 export async function recommendationRoutes(app: FastifyInstance) {
-  app.post('/recommendations/search', async (request) => {
-    const body = recommendationSchema.parse(request.body ?? {});
+  app.post('/recommendations/search', async (request, reply) => {
+    const parsed = recommendationSchema.safeParse(request.body ?? {});
+    if (!parsed.success) {
+      return reply.status(400).send({
+        error: {
+          code: 'BAD_REQUEST',
+          message: parsed.error.errors.map((e) => e.message).join('; '),
+        },
+      });
+    }
+    const body = parsed.data;
     const page = body.page ?? 1;
     const pageSize = body.pageSize ?? 10;
     const query: UserQuery = {

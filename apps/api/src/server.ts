@@ -36,6 +36,9 @@ async function start() {
   }
 }
 
-start();
+if (process.env.NODE_ENV !== 'test') {
+  start();
+}
 
 export type AppInstance = typeof server;
+export { buildServer };

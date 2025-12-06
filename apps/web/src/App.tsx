@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import type { Insight, RecommendationItem, TrendingTopic } from './types';
-import { mockInsights, mockRecommendations, mockTrendingTopics } from './mockData';
+import { useEffect, useMemo, useState } from 'react';
+
 import { apiClient, type RecommendationPayload } from './lib/apiClient';
+import { mockInsights, mockRecommendations, mockTrendingTopics } from './mockData';
+
+import type { Insight, RecommendationItem, TrendingTopic } from './types';
 
 const moodOptions = ['慢热', '治愈', '刺激', '致郁', '搞笑', '轻松', '黑深残'];
 const platformOptions: TrendingTopic['category'][] = ['不限', '晋江', '起点', '长佩', '其他'];
@@ -237,8 +239,11 @@ function App() {
         </section>
 
         <section className="card card-hover p-5 space-y-4">
-          <label className="block text-sm font-semibold text-ink">你的描述</label>
+          <label className="block text-sm font-semibold text-ink" htmlFor="description-input">
+            你的描述
+          </label>
           <textarea
+            id="description-input"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}

@@ -1,11 +1,12 @@
 import 'dotenv/config';
-import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import formBody from '@fastify/formbody';
+import Fastify from 'fastify';
+
+import { registerErrorHandler } from './plugins/errorHandler.js';
+import { healthRoutes } from './routes/health.js';
 import { recommendationRoutes } from './routes/recommendations.js';
 import { trendingRoutes } from './routes/trending.js';
-import { healthRoutes } from './routes/health.js';
-import { registerErrorHandler } from './plugins/errorHandler.js';
 
 const server = Fastify({
   logger: true,

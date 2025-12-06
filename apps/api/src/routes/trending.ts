@@ -1,5 +1,7 @@
-import type { FastifyInstance } from 'fastify';
 import { getInsights, getTrendingTopics } from '../data/mockData.js';
+
+import type { FastifyInstance } from 'fastify';
+
 
 export async function trendingRoutes(app: FastifyInstance) {
   app.get('/trending/topics', async () => {

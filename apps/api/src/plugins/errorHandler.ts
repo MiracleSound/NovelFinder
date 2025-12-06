@@ -1,5 +1,8 @@
-import type { FastifyInstance } from 'fastify';
 import { ZodError } from 'zod';
+
+import type { FastifyInstance } from 'fastify';
+
+
 
 export function registerErrorHandler(app: FastifyInstance) {
   app.setErrorHandler((err, _req, reply) => {

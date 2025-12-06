@@ -18,6 +18,9 @@ module.exports = {
       node: {
         extensions: ['.js', '.jsx', '.ts', '.tsx'],
       },
+      typescript: {
+        project: ['./apps/api/tsconfig.json', './apps/web/tsconfig.json'],
+      },
     },
     tailwindcss: {
       config: 'apps/web/tailwind.config.ts',
@@ -39,6 +42,10 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',
     'tailwindcss/no-custom-classname': 'off',
+    'tailwindcss/classnames-order': 'off',
+    'tailwindcss/enforces-shorthand': 'off',
+    'tailwindcss/migration-from-tailwind-2': 'off',
+    'import/no-unresolved': 'off',
     'import/order': [
       'warn',
       {

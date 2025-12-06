@@ -1,7 +1,8 @@
-import type { FastifyInstance } from 'fastify';
-import type { FeedbackPayload, UserQuery } from '../types.js';
-import { feedbackSchema, recommendationSchema } from '../schemas.js';
 import { getRecommendations } from '../data/mockData.js';
+import { feedbackSchema, recommendationSchema } from '../schemas.js';
+
+import type { FeedbackPayload, UserQuery } from '../types.js';
+import type { FastifyInstance } from 'fastify';
 
 export async function recommendationRoutes(app: FastifyInstance) {
   app.post('/recommendations/search', async (request) => {

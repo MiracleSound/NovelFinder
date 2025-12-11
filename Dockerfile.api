@@ -1,0 +1,17 @@
+FROM node:18-slim AS base
+WORKDIR /app
+
+# Only install prod deps for api
+COPY package.json pnpm-workspace.yaml tsconfig.base.json ./
+COPY apps/api/package.json apps/api/tsconfig.json ./
+RUN corepack enable && pnpm install --filter api --prod --ignore-scripts
+
+# Copy built assets
+COPY apps/api/dist ./apps/api/dist
+COPY apps/api/src ./apps/api/src
+COPY apps/api/.env.example ./apps/api/.env.example
+
+ENV NODE_ENV=production
+ENV PORT=3001
+EXPOSE 3001
+CMD ["node", "apps/api/dist/server.js"]
